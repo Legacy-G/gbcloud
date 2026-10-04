@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Sign Up - Gb-Technologies{% endblock %}
+{% block get_started_button %}
+  <a class="btn-getstarted" href="{% url 'login' %}">Login</a>
+{% endblock %}
+{% block content %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const submitBtn = document.getElementById("submit-btn");
+    const requiredInputs = document.querySelectorAll("input[required]");
+
+    function checkForm() {
+      let allFilled = true;
+      requiredInputs.forEach(input => {
+        if (input.value.trim() === "") {
+          allFilled = false;
+        }
+      });
+
+      submitBtn.disabled = !allFilled;
+    }
+
+    requiredInputs.forEach(input => {
+      input.addEventListener("input", checkForm);
+    });
+  });
+</script>
+
+
+<section class="auth-section section">
+  <div class="container" data-aos="fade-up">
+    <div class="row justify-content-center">
+      <div class="col-lg-6 col-md-8">
+        <div class="auth-container">
+          <h2>Create an Account</h2>
+          <form method="POST" class="auth-form">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-md-6 mb-3">{{ form.first_name.label_tag }}{{ form.first_name }}</div>
+              <div class="col-md-6 mb-3">{{ form.surname.label_tag }}{{ form.surname }}</div>
+            </div>
+            <div class="mb-3">{{ form.middlename.label_tag }}{{ form.middlename }}</div>
+            <div class="mb-3">{{ form.date_of_birth.label_tag }}{{ form.date_of_birth }}</div>
+            <div class="mb-3">{{ form.phone_number.label_tag }}{{ form.phone_number }}</div>
+            <div class="mb-3">{{ form.country.label_tag }}{{ form.country }}</div>
+            <div class="mb-3">{{ form.email.label_tag }}{{ form.email }}</div>
+            <div class="mb-3">{{ form.password.label_tag }}{{ form.password }}</div>
+            <div class="mb-3">{{ form.confirm_password.label_tag }}{{ form.confirm_password }}</div>
+            <button type="submit" class="btn btn-primary" id="submit-btn" disabled>Sign Up</button>
+          </form>
+          <p class="text-center mt-3">
+            Already have an account? <a href="{% url 'login' %}">Login</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+<!-- This is the registration template for the Gb-Technologies web interface.
+     It allows users to create a new account by providing their personal information,
+     including name, date of birth, phone number, country, email, and password.
+     The form includes validation and CSRF protection. -->
