@@ -88,10 +88,15 @@ WSGI_APPLICATION = 'webint.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+if os.environ.get('VERCEL'):
+    default_db_url = "sqlite:////tmp/db.sqlite3"
+else:
+    default_db_url = f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+
 DATABASES = {
     'default': env.db(
         'DATABASE_URL',
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+        default=default_db_url
     )
 }
 
