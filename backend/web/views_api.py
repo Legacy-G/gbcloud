@@ -63,7 +63,7 @@ class HealthCheckView(APIView):
 
     @extend_schema(
         summary="Service Health Check",
-        description="Verify service availability and database connectivity.",
+        description="Verify service availability, database connectivity, and Redis cache.",
         responses={200: OpenApiResponse(description="Service is healthy")}
     )
     def get(self, request):
@@ -74,9 +74,22 @@ class HealthCheckView(APIView):
         except Exception as exc:
             db_status = f"unhealthy: {str(exc)}"
 
+        cache_status = "healthy"
+        try:
+            from django.core.cache import cache
+            cache.set("health_check_ping", "ok", 10)
+            val = cache.get("health_check_ping")
+            if val != "ok":
+                cache_status = "degraded"
+        except Exception as exc:
+            cache_status = f"unhealthy: {str(exc)}"
+
+        overall_healthy = (db_status == "healthy" and cache_status == "healthy")
+
         return Response({
-            "status": "healthy" if db_status == "healthy" else "degraded",
+            "status": "healthy" if overall_healthy else "degraded",
             "database": db_status,
+            "cache": cache_status,
             "version": "1.0.0",
             "timestamp": datetime.utcnow().isoformat() + "Z"
         })

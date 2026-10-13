@@ -95,6 +95,41 @@ DATABASES = {
     )
 }
 
+# ==============================================================================
+# Cache & Redis Configuration (Upstash / Redis with LocMem fallback)
+# ==============================================================================
+REDIS_URL = env('REDIS_URL', default=None)
+
+if REDIS_URL:
+    try:
+        import certifi
+        ssl_ca_path = certifi.where()
+    except ImportError:
+        ssl_ca_path = None
+
+    connection_pool_kwargs = {}
+    if REDIS_URL.startswith('rediss://') and ssl_ca_path:
+        connection_pool_kwargs['ssl_ca_certs'] = ssl_ca_path
+
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'CONNECTION_POOL_KWARGS': connection_pool_kwargs,
+                'IGNORE_EXCEPTIONS': True,  # Ensures Redis outages never break DB or API endpoints
+            }
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'gbcloud-local-cache',
+        }
+    }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
